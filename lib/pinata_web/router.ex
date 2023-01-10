@@ -19,9 +19,7 @@ defmodule PinataWeb.Router do
 
   scope "/", PinataWeb do
     pipe_through :browser
-
     get "/", PageController, :index
-    live "/guess", Guess
   end
 
   # Other scopes may use custom stacks.
@@ -76,6 +74,7 @@ defmodule PinataWeb.Router do
   scope "/", PinataWeb do
     pipe_through [:browser, :require_authenticated_user]
 
+    live "/guess", Guess
     get "/users/settings", UserSettingsController, :edit
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
