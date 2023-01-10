@@ -18,6 +18,7 @@ defmodule PinataWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    live "/guess", Guess
   end
 
   # Other scopes may use custom stacks.
