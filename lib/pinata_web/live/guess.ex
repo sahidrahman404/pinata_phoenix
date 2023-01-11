@@ -30,7 +30,7 @@ defmodule PinataWeb.Guess do
         <% end %>
       </h2>
       <p>hint: <%= @generated_num %></p>
-      <p><%= @current_user.email %></p>
+      <p><%= @current_user.username %></p>
       <p><%= @session_id %></p>
     <% else %>
       <h1 style="color: orange;text-align: center">GAME OVER !!!</h1>
