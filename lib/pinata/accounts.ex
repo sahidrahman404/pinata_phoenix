@@ -44,6 +44,25 @@ defmodule Pinata.Accounts do
     if User.valid_password?(user, password), do: user
   end
 
+
+  @doc """
+  Gets a user by username and password.
+
+  ## Examples
+
+      iex> get_user_by_username_and_password("rbbx574", "correct_password")
+      %User{}
+
+      iex> get_user_by_username_and_password("rbbx574", "invalid_password")
+      nil
+
+  """
+  def get_user_by_username_and_password(username, password)
+      when is_binary(username) and is_binary(password) do
+    user = Repo.get_by(User, username: username)
+    if User.valid_password?(user, password), do: user
+  end
+
   @doc """
   Gets a single user.
 
