@@ -4,6 +4,7 @@ defmodule Pinata.Accounts.User do
 
   schema "users" do
     field :email, :string
+    field :username, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
@@ -30,7 +31,8 @@ defmodule Pinata.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :username, :password])
+    |> validate_username()
     |> validate_email()
     |> validate_password(opts)
   end
@@ -38,10 +40,20 @@ defmodule Pinata.Accounts.User do
   defp validate_email(changeset) do
     changeset
     |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
+    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/,
+      message: "must have the @ sign and no spaces"
+    )
     |> validate_length(:email, max: 160)
     |> unsafe_validate_unique(:email, Pinata.Repo)
     |> unique_constraint(:email)
+  end
+
+  defp validate_username(changeset) do
+    changeset
+    |> validate_required([:username])
+    |> validate_length(:username, min: 5, max: 225)
+    |> unsafe_validate_unique(:username, Pinata.Repo)
+    |> unique_constraint(:username)
   end
 
   defp validate_password(changeset, opts) do
@@ -117,7 +129,10 @@ defmodule Pinata.Accounts.User do
   If there is no user or the user doesn't have a password, we call
   `Bcrypt.no_user_verify/0` to avoid timing attacks.
   """
-  def valid_password?(%Pinata.Accounts.User{hashed_password: hashed_password}, password)
+  def valid_password?(
+        %Pinata.Accounts.User{hashed_password: hashed_password},
+        password
+      )
       when is_binary(hashed_password) and byte_size(password) > 0 do
     Bcrypt.verify_pass(password, hashed_password)
   end
