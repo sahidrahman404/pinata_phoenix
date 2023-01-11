@@ -1,13 +1,18 @@
 defmodule PinataWeb.Guess do
+  alias Pinata.Accounts
   use Phoenix.LiveView, layout: {PinataWeb.LayoutView, "live.html"}
 
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
+    user = Accounts.get_user_by_session_token(session["user_token"])
+
     {:ok,
      assign(socket,
        score: 0,
        message: "Make a guess:",
        generated_num: :rand.uniform(10),
-       color: ""
+       color: "",
+       session_id: session["live_socket_id"],
+       current_user: user
      )}
   end
 
@@ -25,6 +30,8 @@ defmodule PinataWeb.Guess do
         <% end %>
       </h2>
       <p>hint: <%= @generated_num %></p>
+      <p><%= @current_user.email %></p>
+      <p><%= @session_id %></p>
     <% else %>
       <h1 style="color: orange;text-align: center">GAME OVER !!!</h1>
       <a data-phx-link="patch" data-phx-link-state="push" href="/">
