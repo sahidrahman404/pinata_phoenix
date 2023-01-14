@@ -5,8 +5,14 @@ defmodule Pinata.Promo do
     Recipient.changeset(recipient, attrs)
   end
 
-  def send_promo(_recipient, _attrs) do
-    # send email to promo recipient
-    {:ok, %Recipient{}}
+  def send_promo(recipient, attrs) do
+    recipient = Recipient.changeset(recipient, attrs)
+    %Ecto.Changeset{valid?: valid} = recipient
+
+    if valid do
+      {:ok, recipient}
+    else
+      {:error, recipient}
+    end
   end
 end
