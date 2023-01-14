@@ -5,7 +5,7 @@ defmodule PinataWeb.ProductLive.Show do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, assign(socket, :show, "Show Product")}
   end
 
   @impl true
