@@ -10,7 +10,36 @@ defmodule PinataWeb.ProductLive.FormComponent do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(:changeset, changeset)}
+     |> assign(:alert, true)
+     |> assign(:changeset, changeset)
+     |> allow_upload(:image,
+       accept: ~w(.jpg .jpeg .png),
+       max_entries: 1,
+       max_file_size: 9_000_000,
+       progress: &handle_progress/3
+     )}
+  end
+
+  defp handle_progress(:image, entry, socket) do
+    if entry.done? do
+      path =
+        consume_uploaded_entry(socket, entry, &upload_static_file(&1, socket))
+
+      {:noreply,
+       socket
+       |> put_flash(:info, "file #{entry.client_name} uploaded")
+       |> assign(:alert, false)
+       |> assign(:image_upload, path)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  defp upload_static_file(%{path: path}, socket) do
+    # Plug in your production image file persistence implementation here!
+    dest = Path.join("priv/static/images", Path.basename(path))
+    File.cp!(path, dest)
+    {:ok, Routes.static_path(socket, "/images/#{Path.basename(dest)}")}
   end
 
   @impl true
@@ -23,12 +52,19 @@ defmodule PinataWeb.ProductLive.FormComponent do
     {:noreply, assign(socket, :changeset, changeset)}
   end
 
+  def handle_event("cancel", %{"ref" => ref}, socket) do
+    {:noreply, cancel_upload(socket, :image, ref)}
+  end
+
   def handle_event("save", %{"product" => product_params}, socket) do
     save_product(socket, socket.assigns.action, product_params)
   end
 
-  defp save_product(socket, :edit, product_params) do
-    case Catalog.update_product(socket.assigns.product, product_params) do
+  defp save_product(socket, :edit, params) do
+    case Catalog.update_product(
+           socket.assigns.product,
+           product_params(socket, params)
+         ) do
       {:ok, _product} ->
         {:noreply,
          socket
@@ -40,8 +76,8 @@ defmodule PinataWeb.ProductLive.FormComponent do
     end
   end
 
-  defp save_product(socket, :new, product_params) do
-    case Catalog.create_product(product_params) do
+  defp save_product(socket, :new, params) do
+    case Catalog.create_product(product_params(socket, params)) do
       {:ok, _product} ->
         {:noreply,
          socket
@@ -52,4 +88,21 @@ defmodule PinataWeb.ProductLive.FormComponent do
         {:noreply, assign(socket, changeset: changeset)}
     end
   end
+
+  defp product_params(socket, params) do
+    Map.put(params, "image_upload", socket.assigns.image_upload)
+  end
+
+  def upload_image_error(uploads, entry) do
+    for {ref, msg} <- uploads.errors do
+      if ref == entry.ref do
+        error_to_string(msg)
+      end
+    end
+  end
+
+  defp error_to_string(:too_large), do: "Too large"
+
+  defp error_to_string(:not_accepted),
+    do: "You have selected an unacceptable file type"
 end
