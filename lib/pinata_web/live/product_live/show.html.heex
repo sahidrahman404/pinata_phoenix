@@ -13,8 +13,21 @@
   </.modal>
 <% end %>
 
-<ul>
+<article>
+  <img
+    src={
+      Routes.static_path(
+        @socket,
+        @product.image_upload || ~s[/images/default-thumbnail.jpg]
+      )
+    }
+    alt="product image"
+    width="200"
+    height="200"
+  />
+</article>
 
+<ul>
   <li>
     <strong>Name:</strong>
     <%= @product.name %>
@@ -34,8 +47,13 @@
     <strong>Sku:</strong>
     <%= @product.sku %>
   </li>
-
 </ul>
 
-<span><%= live_patch "Edit", to: Routes.product_show_path(@socket, :edit, @product), class: "button" %></span> |
-<span><%= live_redirect "Back", to: Routes.product_index_path(@socket, :index) %></span>
+<span>
+  <%= live_patch("Edit",
+    to: Routes.product_show_path(@socket, :edit, @product),
+    class: "button"
+  ) %>
+</span>
+|
+<span><%= live_redirect("Back", to: Routes.product_index_path(@socket, :index)) %></span>
