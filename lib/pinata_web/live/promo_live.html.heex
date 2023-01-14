@@ -17,7 +17,7 @@
 
 
     <%= label(f, :email) %>
-    <%= email_input(f, :email) %>
+    <%= email_input(f, :email, phx_debounce: "blur") %>
     <%= error_tag(f, :email) %>
 
     <%= submit "Send Promo", phx_disable_with: "Sending promo..." %>
