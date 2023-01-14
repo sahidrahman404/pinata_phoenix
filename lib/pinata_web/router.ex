@@ -77,6 +77,7 @@ defmodule PinataWeb.Router do
 
     live_session :default, on_mount: UserAuthLive do
       live "/guess", Guess
+      live "/promo", PromoLive
 
       live "/products", ProductLive.Index, :index
       live "/products/new", ProductLive.Index, :new
